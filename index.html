@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Cat-echism!</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Styling for layout and design */
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif; /* Fun font */
+            background: linear-gradient(to bottom, #e0f7fa, #b2ebf2); /* Light blue gradient */
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        .question-card {
+            background: rgba(255, 255, 255, 0.9); /* Slightly less transparent */
+            border: 3px solid #4CAF50; /* Green border */
+            border-radius: 20px; /* More rounded corners */
+            transition: transform 0.2s, box-shadow 0.2s; /* Adding shadow effect */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .question-card:hover { 
+            transform: scale(1.1); 
+            cursor: pointer; 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3); /* Enhance shadow on hover */
+        }
+        .verse-quote {
+            border-left: 4px solid #4CAF50; /* Matching the card border */
+            padding: 10px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #2E7D32; /* Darker green for better contrast */
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Darker background for modal */
+        }
+        .modal-content {
+            background-color: #f0f0f0; /* Light grey */
+            margin: 10% auto;
+            padding: 20px;
+            border: 3px solid #4CAF50;
+            border-radius: 20px; /* More rounded corners */
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 28px;
+            color: #666;
+        }
+        .close:hover { 
+            color: #333; 
+        }
+        button {
+            background-color: #4CAF50; /* Button color */
+            color: white;
+        }
+        button:hover {
+            background-color: #45a049; /* Darker button on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4">
+        <header class="bg-blue-600 text-white py-4 px-6 rounded-b-lg shadow-md">
+            <h1 class="text-2xl text-center font-bold">Catechism Training</h1>
+        </header>
+
+        <div class="note">
+            Just an aid, not a replacement for Catechism training :-).<br>
+             P.S excuse the small bug on repetition<br>
+             Note: Audio only works on a computer<br>
+             
+        </div>
+
+        <!-- Question Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8" id="questionGrid"></div>
+
+        <!-- Question Modal -->
+        <div id="questionModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalQuestion" class="text-xl font-bold mb-4"></h2>
+                <p id="modalAnswer" class="mb-4"></p>
+                <div id="modalVerse" class="verse-quote"></div>
+                <button onclick="speakContent()" class="px-6 py-2 rounded-full hover:bg-green-600 transition-colors mt-4 w-full md:w-auto">
+                    Listen to Question
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // Your question objects remain the same
+            {
+      'question': 'Question 1. What sort of redeemer is needed to bring us back to God?',
+      'answer': 'Answer: One who is truly human and also truly God.',
+      'verse': 'Isaiah 9:6 - For to us a child is born, to us a son is given; and the government shall be upon his shoulder, and his name shall be called Wonderful Counselor, Mighty God, Everlasting Father, Prince of Peace.'
+    },
+    {
+      'question': 'Question 2. Why must the Redeemer be truly human?',
+      'answer': 'Answer: That in human nature he might on our behalf perfectly obey the whole law and suffer the punishment for human sin.',
+      'verse': 'Hebrews 2:17 - Therefore he had to be made like his brothers in every respect, so that he might become a merciful and faithful high priest in the service of God, to make propitiation for the sins of the people.'
+    },
+    {
+      'question': 'Question 3. Why must the Redeemer be truly God?',
+      'answer': 'Answer: That because of his divine nature his obedience and suffering would be perfect and effective.',
+      'verse': 'Acts 2:24 - God raised Him up, loosing the pangs of death, because it was not possible for Him to be held by it.'
+    },
+    {
+      'question': 'Question 4. Why is it necessary for Christ, the Redeemer, to die?',
+      'answer': 'Answer: Christ died willingly in our place to deliver us from the power and penalty of sin and bring us back to God.',
+      'verse': 'Colossians 1:21-22 - And you, who once were alienated and hostile in mind, doing evil deeds, he has now reconciled in his body of flesh by his death, in order to present you holy and blameless and above reproach before Him.'
+    },
+    {
+      'question': "Question 5. Does Christ's death mean all our sins can be forgiven?",
+      'answer': "Answer: Yes, because Christ's death on the cross fully paid the penalty for our sin, God will remember our sins no more.",
+      'verse': 'Second Corinthians 5:21 - For our sake He made Him to be sin who knew no sin. So that in Him we might become the righteousness of God.'
+    },
+    {
+      'question': "Question 6. What else does Christ's death redeem?",
+      'answer': "Answer: Every part of fallen creation.",
+      'verse': "Colossians 1:19-20 - For in Him all the fullness of God was pleased to dwell, and through Him to reconcile to Himself all things, whether on earth or in heaven, making peace by the blood of His cross."
+    },
+    {
+      'question': 'Question 7. Are all people, just as they were lost through Adam, saved through Christ?',
+      'answer': 'Answer: No, only those who were elected by God and united to Christ by faith.',
+      'verse': "Romans 5:17 - For the sin of this one man, Adam, caused death to rule. But even greater is God's wonderful grace and his gift of righteousness, for all who receive it will live in triumph over sin and death through this one man, Jesus Christ."
+    },
+    {
+      'question': 'Question 8. What happens after death to those not united to Christ by faith?',
+      'answer': 'Answer: They will be cast out from the presence of God, into hell, to be justly punished, forever.',
+      'verse': 'John 3:16 - For God so loved the world, that he gave his one and only Son, that whoever believes in him, should not perish but have eternal life.'
+    },
+    {
+      'question': 'Question 9. How can we be saved?',
+      'answer': 'Answer: Only by faith in Jesus Christ and in his substitutionary atoning death on the cross.',
+      'verse': 'Ephesians 2:8-9 - For by grace you have been saved through faith. And this is not your own doing; it is the gift of God, not a result of works, so that no one may boast.'
+    },
+    {
+      'question': "Question 10. What is faith in Jesus Christ?",
+      'answer': "Answer: Receiving and resting on Him alone for salvation as He is offered to us in the gospel.",
+      'verse': "Galatians 2:20 - I have been crucified with Christ. It is no longer I who live, but Christ who lives in me. And the life I now live in the flesh I live by faith in the Son of God, who loved me and gave himself for me."
+    },
+    {
+      'question': "Question 11. What do we believe by true faith?",
+      'answer': "Answer: We believe in God the Father Almightly, Maker of heaven and earth; and in Jesus Christ his only Son our Lord, who was conceived by the Holy Spirit, born of the virgin Mary, suffered under Pontius Pilate, was crucified, died, and was buried. He descended into hell. The third day he rose again from the dead. He ascended into heaven and is seated at the right hand of God the Father Almighty; from there he will come to judge the living and the dead. We believe in the Holy Spirit, the holy catholic church, the communion of saints, the forgiveness of sins, the resurrection of the body, and the life everlasting.",
+      'verse': "Jude 1:3 - I found it necessary to write appealing to you to contend for the faith that was once for all delivered to the saints."
+    },
+    {
+      'question': "Question 12, part A. What does justification mean?",
+      'answer': "Answer: Justification means our declared righteousness before God.",
+      'verse': "Romans 5:1-2 - Therefore, since we have been justified by faith, we have peace with God through our Lord Jesus Christ. Through him we have also obtained access by faith into this grace in which we stand, and we rejoice in hope of the glory of God."
+    },
+    {
+      'question': "Question 12, part B. What does sanctification mean?",
+      'answer': "Answer: Sanctification means our gradual, growing righteousness.",
+      'verse': "1 Thessalonians 5:23 - Now may the God of peace himself sanctify you completely, and may your whole spirit and soul and body be kept blameless at the coming of our Lord Jesus Christ."
+    },
+    {
+      'question': "Question 13. Should those who have faith in Christ seek their salvation through their own works, or anywhere else?",
+      'answer': "Answer: No, everything necessary to salvation is found in Christ.",
+      'verse': "Galatians 2:16 - Yet we know that a person is not justified by works of the law but through faith in Jesus Christ, so we also have believed in Christ Jesus, in order to be justified by faith in Christ and not by works of the law, because by works of the law no one will be justified."
+    },
+    {
+      'question': "Question 14. Since we are redeemed by grace alone, through Christ alone, must we still do good works and obey God's Word?",
+      'answer': "Answer: Yes, so that our lives may show love and gratitude to God; and so that by our godly behavior others may be won to Christ.",
+      'verse': "1 Peter 2:9-10 - But you are a chosen race, a royal priesthood, a holy nation, a people for his own possession, that you may proclaim the excellencies of Him who called you out of darkness into his marvelous light. Once you were not a people, but now you are God's people; once you had not received mercy, but now you have received mercy."
+    },
+    {
+      'question': "Question 15. Since we are redeemed by grace alone, through faith alone, where does this faith come from?",
+      'answer': "Answer: From the Holy Spirit.",
+      'verse': "Titus 3:4-6 - But when the goodness and loving kindness of God our Savior appeared, he saved us, not because of works done by us in righteousness, but according to his own mercy, by the washing of regeneration and renewal of the Holy Spirit, whom he poured out on us richly through Jesus Christ our Savior."
+    }
+
+        ];
+
+        function formatBibleReferenceForSpeech(verse) {
+    // Regular expression to match Bible references with optional numbered books and verse ranges
+    const referenceRegex = /^([1-3]?)\s*([A-Za-z]+)\s*(\d+):(\d+)(?:-(\d+))?/;
+    
+    const match = verse.match(referenceRegex);
+    if (match) {
+        let [_, number, book, chapter, verseNum, endVerse] = match;
+        // Handle numbered books
+        if (number) {
+            if (number === "1") number = "First";
+            else if (number === "2") number = "Second";
+            else if (number === "3") number = "Third";
+        }
+        
+        const restOfVerse = verse.substring(verse.indexOf('-') + 1).trim();
+        // Format full reference with "through" for verse ranges
+        return `${number} ${book} chapter ${chapter}, verse ${verseNum}` +
+            (endVerse ? ` through verse ${endVerse}` : "") + ` ${restOfVerse}`;
+    }
+    return verse;
+}
+
+function createQuestionCards() {
+    const grid = document.getElementById('questionGrid');
+    questions.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card p-6 flex flex-col items-center';
+        // Adjust question numbering for Questions 12 and 13 (part A and B), and renumber Questions 14, 15, and 16
+        let questionLabel;
+        if (index === 11) {  // Adjust for zero-based index; 11 is Question 12
+            questionLabel = "Question 12 (part A)";
+        } else if (index === 12) {  // 12 is Question 13
+            questionLabel = "Question 12 (part B)";
+        } else if (index === 13) {  // 13 is Question 14
+            questionLabel = "Question 13";
+        } else if (index === 14) {  // 14 is Question 15
+            questionLabel = "Question 14";
+        } else if (index === 15) {  // 15 is Question 16
+            questionLabel = "Question 15";
+        } else {
+            questionLabel = `Question ${index + 1}`;
+        }
+        card.innerHTML = `<p class="text-center font-bold">${questionLabel}</p>`;
+        card.onclick = () => showQuestion(q);
+        grid.appendChild(card);
+    });
+}
+
+
+        function showQuestion(questionData) {
+            const modal = document.getElementById('questionModal');
+            document.getElementById('modalQuestion').textContent = questionData.question;
+            document.getElementById('modalAnswer').textContent = questionData.answer;
+            document.getElementById('modalVerse').textContent = questionData.verse;
+            modal.style.display = 'block';
+        }
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('questionModal').style.display = 'none';
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('questionModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        function speakContent() {
+            const questionData = document.getElementById('modalQuestion').textContent;
+            const answerData = document.getElementById('modalAnswer').textContent;
+            const verseData = document.getElementById('modalVerse').textContent;
+            // Format verse reference for clearer speech synthesis
+            const formattedVerseData = formatBibleReferenceForSpeech(verseData);
+            const fullText = `${questionData} ${answerData} Memory verse: ${formattedVerseData}`;
+            const utterance = new SpeechSynthesisUtterance(fullText);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            speechSynthesis.speak(utterance);
+        }
+        createQuestionCards();
+    </script>
+</body>
+</html>
+
